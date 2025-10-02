@@ -4,8 +4,9 @@ const nextConfig: NextConfig = {
   /* config options here */
   reactStrictMode: true,
   images: {
-    domains: ['encrypted-tbn1.gstatic.com']
+    domains: ['encrypted-tbn1.gstatic.com', 'imgs.search.brave.com']
   }
 };
+
 
 export default nextConfig;
