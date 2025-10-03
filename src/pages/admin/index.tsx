@@ -75,6 +75,29 @@ const AdminPage = () => {
             setSelectMenu(null)
         }
     }
+    const handleUpdateMenu = async (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+        console.log(formData)
+        try {
+            const { error } = await supabase
+                .from('menus')
+                .update(Object.fromEntries(formData))
+                .eq('id', selectMenu?.menu.id);
+
+            if (error) console.log('error', error)
+            else {
+                setMenus((prev) => prev.map((menu) => menu.id === selectMenu?.menu.id ? { ...menu, ...Object.fromEntries(formData) } : menu))
+                toast("Edit Menu successfully");
+                setSelectMenu(null)
+            }
+
+        } catch (error) {
+            console.log('error', error)
+            toast('something went wrong');
+        }
+    }
+
     return (
         <div className="container mx-auto py-8">
             <div className="mb-4 w-full flex justify-between">
@@ -192,7 +215,7 @@ const AdminPage = () => {
                                             </DropdownMenuLabel>
                                             <DropdownMenuSeparator />
                                             <DropdownMenuGroup>
-                                                <DropdownMenuItem>Update</DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => setSelectMenu({ menu, action: 'edit' })}>Update</DropdownMenuItem>
                                                 <DropdownMenuItem className="text-red-400" onClick={() => setSelectMenu({ menu, action: 'delete' })}>Delete</DropdownMenuItem>
                                             </DropdownMenuGroup>
                                         </DropdownMenuContent>
@@ -222,6 +245,87 @@ const AdminPage = () => {
                         </DialogClose>
                         <Button onClick={handleDelete} variant='destructive' className="cursor-pointer">Submit</Button>
                     </DialogFooter>
+                </DialogContent>
+            </Dialog>
+            <Dialog open={selectMenu !== null && selectMenu.action === 'edit'}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setSelectMenu(null)
+                    }
+                }}>
+
+                <DialogContent className="sm:max-w-md">
+                    <form onSubmit={handleUpdateMenu} className="space-y-4">
+                        <DialogHeader>
+                            <DialogTitle>Edit Menu</DialogTitle>
+                            <DialogDescription>Make a changes to your menu</DialogDescription>
+                        </DialogHeader>
+                        <div className="grid w-full gap-4">
+                            <div className="grid w-full gap-1.5">
+                                <Label htmlFor="name">Name</Label>
+                                <Input
+                                    id="name"
+                                    name="name"
+                                    placeholder="Insert Name"
+                                    required
+                                    defaultValue={selectMenu?.menu.name}
+                                />
+                            </div>
+                            <div className="grid w-full gap-1.5">
+                                <Label htmlFor="price">Price</Label>
+                                <Input
+                                    id="price"
+                                    name="price"
+                                    placeholder="Insert Price"
+                                    required
+                                    defaultValue={selectMenu?.menu.price}
+                                />
+                            </div>
+                            <div className="grid w-full gap-1.5">
+                                <Label htmlFor="image">Image</Label>
+                                <Input
+                                    id="image"
+                                    name="image"
+                                    placeholder="Insert Image"
+                                    required
+                                    defaultValue={selectMenu?.menu.image}
+                                />
+                            </div>
+                            <div className="grid w-full gap-1.5">
+                                <Label htmlFor="category">Catgeory</Label>
+                                <Select required name="category" defaultValue={selectMenu?.menu.category}>
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Select Category" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectLabel>Category</SelectLabel>
+                                            <SelectItem value="Foods">Foods</SelectItem>
+                                            <SelectItem value="Drink">Drink</SelectItem>
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="grid w-full gap-1.5">
+                                <Label htmlFor="description">Description</Label>
+                                <Textarea
+                                    id="description"
+                                    name="description"
+                                    placeholder="Insert Description"
+                                    required
+                                    className="resize-none h-32"
+                                    defaultValue={selectMenu?.menu.description}
+                                />
+                            </div>
+                        </div>
+
+                        <DialogFooter>
+                            <DialogClose>
+                                <Button variant="secondary" type="button" className="cursor-pointer">Cancel</Button>
+                            </DialogClose>
+                            <Button type="submit" className="cursor-pointer">Submit</Button>
+                        </DialogFooter>
+                    </form>
                 </DialogContent>
             </Dialog>
         </div>
